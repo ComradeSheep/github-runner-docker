@@ -8,6 +8,13 @@ set -e
 
 RUNNER_DIR="/home/runner/actions-runner"
 CONFIG_FILE="${RUNNER_DIR}/.runner"
+WORK_DIR="${RUNNER_DIR}/_work"
+
+# Fix permissions on mounted volume (may be owned by root)
+if [ -d "${WORK_DIR}" ]; then
+    sudo chown -R runner:runner "${WORK_DIR}" 2>/dev/null || true
+fi
+mkdir -p "${WORK_DIR}/_tool" 2>/dev/null || true
 
 # Color codes for output
 RED='\033[0;31m'
