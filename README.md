@@ -41,10 +41,11 @@ docker run -d \
   -e RUNNER_NAME="docker-runner-01" \
   -e RUNNER_LABELS="docker,linux,x64" \
   -v github-runner-data:/home/runner/actions-runner \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   github-runner:latest
 ```
 
-On PowerShell, replace `\` with backticks:
+On PowerShell (Docker Desktop for Windows):
 
 ```powershell
 docker run -d `
@@ -55,6 +56,7 @@ docker run -d `
   -e RUNNER_NAME="docker-runner-01" `
   -e RUNNER_LABELS="docker,linux,x64" `
   -v github-runner-data:/home/runner/actions-runner `
+  -v //var/run/docker.sock:/var/run/docker.sock `
   github-runner:latest
 ```
 

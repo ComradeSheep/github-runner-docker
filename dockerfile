@@ -44,14 +44,25 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
-# STEP 2: Create runner user and set up directories
+# STEP 2: Install Docker CLI (for workflows that build/push images)
+# =============================================================================
+RUN install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+    && chmod a+r /etc/apt/keyrings/docker.asc \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli docker-buildx-plugin \
+    && rm -rf /var/lib/apt/lists/*
+
+# =============================================================================
+# STEP 3: Create runner user and set up directories
 # =============================================================================
 RUN groupadd -g ${RUNNER_GID} ${RUNNER_USER} \
     && useradd -m -u ${RUNNER_UID} -g ${RUNNER_GID} -s /bin/bash ${RUNNER_USER} \
     && echo "${RUNNER_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # =============================================================================
-# STEP 3: Download and extract GitHub Actions Runner
+# STEP 4: Download and extract GitHub Actions Runner
 # =============================================================================
 WORKDIR /home/${RUNNER_USER}/actions-runner
 
@@ -61,17 +72,17 @@ RUN curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L \
     && rm actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
 
 # =============================================================================
-# STEP 4: Install runner dependencies
+# STEP 5: Install runner dependencies
 # =============================================================================
 RUN ./bin/installdependencies.sh
 
 # =============================================================================
-# STEP 5: Set ownership and permissions
+# STEP 6: Set ownership and permissions
 # =============================================================================
 RUN chown -R ${RUNNER_USER}:${RUNNER_USER} /home/${RUNNER_USER}
 
 # =============================================================================
-# STEP 6: Copy entrypoint script
+# STEP 7: Copy entrypoint script
 # =============================================================================
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
 
@@ -80,7 +91,7 @@ USER ${RUNNER_USER}
 WORKDIR /home/${RUNNER_USER}/actions-runner
 
 # =============================================================================
-# STEP 7: Define volumes for persistence
+# STEP 8: Define volumes for persistence
 # These directories contain configuration and work data that should persist
 # =============================================================================
 # .credentials, .credentials_rsaparams, .runner - Authentication & config
