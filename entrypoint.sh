@@ -16,6 +16,17 @@ if [ -d "${WORK_DIR}" ]; then
 fi
 mkdir -p "${WORK_DIR}/_tool" 2>/dev/null || true
 
+# Fix Docker socket permissions if mounted
+DOCKER_SOCK="/var/run/docker.sock"
+if [ -S "${DOCKER_SOCK}" ]; then
+    DOCKER_GID=$(stat -c '%g' ${DOCKER_SOCK})
+    if ! getent group docker > /dev/null 2>&1; then
+        sudo groupadd -g ${DOCKER_GID} docker 2>/dev/null || true
+    fi
+    sudo usermod -aG docker runner 2>/dev/null || true
+    sudo chmod 666 ${DOCKER_SOCK} 2>/dev/null || true
+fi
+
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
