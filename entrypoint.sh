@@ -25,6 +25,9 @@ if [ -S "${DOCKER_SOCK}" ]; then
     fi
     sudo usermod -aG docker runner 2>/dev/null || true
     sudo chmod 666 ${DOCKER_SOCK} 2>/dev/null || true
+
+    # Configure buildx to use docker driver (avoids nested container issues)
+    docker buildx create --name default-builder --driver docker --use 2>/dev/null || true
 fi
 
 # Color codes for output
